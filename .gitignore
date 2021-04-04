@@ -1,2 +1,10 @@
-.gradle/
-eclipse/
+.classpath
+.gradle
+.project
+.settings
+bin
+build
+eclipse
+*.iml
+*.opr
+*.iws
