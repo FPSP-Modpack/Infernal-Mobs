@@ -39,7 +39,7 @@ public class MM_1UP extends MobModifier
     
     public static void loadConfig(Configuration config)
     {
-        healAmount = config.get(MM_1UP.class.getSimpleName(), "healAmountMultiplier", 1.0D, "Multiplies the mob maximum health when healing back up, cannot get past maximum mob health").getDouble(1.0D);
+        healAmount = config.get(MM_1UP.class.getSimpleName(), "healAmountMultiplier", 1D, "Multiplies the mob maximum health when healing back up").getDouble(1D);
     }
 
     @Override

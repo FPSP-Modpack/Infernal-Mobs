@@ -66,6 +66,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.monster.EntityMob;
@@ -529,6 +530,7 @@ public class InfernalMobsCore
      */
     public void setEntityHealthPastMax(EntityLivingBase entity, float amount)
     {
+    	entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(amount);
         entity.setHealth(amount);
         instance.sendHealthPacket(entity, amount);
     }
