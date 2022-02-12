@@ -2,6 +2,8 @@ package atomicstryker.infernalmobs.common;
 
 import java.util.ArrayList;
 
+import javax.annotation.Nullable;
+
 import org.apache.logging.log4j.Level;
 
 import cpw.mods.fml.common.FMLLog;
@@ -62,13 +64,14 @@ public abstract class MobModifier
      */
     private String bufferedEntityName;
     
-    public MobModifier()
+    public MobModifier(String name, @Nullable MobModifier next)
     {
-        nextMod = null;
+        nextMod = next;
         healthHacked = false;
         actualHealth = 100;
         actualMaxHealth = -1;
         bufferedSize = 0;
+        modName = name;
     }
     
     /**
@@ -482,14 +485,6 @@ public abstract class MobModifier
      * and clean up their changes when necessary
      */
     public void resetModifiedVictim(EntityPlayer victim)
-    {
-        // NOOP by default
-    }
-
-    /**
-     * Load modifier-specific configuration
-     */
-    public static void loadConfig(Configuration config)
     {
         // NOOP by default
     }
