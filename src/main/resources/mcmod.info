@@ -1,18 +1,21 @@
-[
 {
-  "modid": "InfernalMobs",
-  "name": "Infernal Mobs",
-  "description": "Diablo Style random Enchantments on Entities! Harder fights! More XP and enchanted loot!",
-  "mcversion": "${mcversion}",
-  "version": "${version}",
-  "url": "http://www.minecraftforum.net/topic/991952-",
-  "authors": [
-    "AtomicStryker"
-  ],
-  "credits": "Forge devs",
-  "logoFile": "assets/infernalmobs/textures/gui/logo.png",
-  "dependencies": [
-	"Forge"
-  ]
+	"modListVersion": 2,
+	"modList": [{
+		"modid": "${modId}",
+		"name": "${modName}",
+		"description": "Diablo Style random Enchantments on Entities! Harder fights! More XP and enchanted loot!",
+		"version": "${modVersion}",
+		"mcversion": "${minecraftVersion}",
+		"url": "https://www.minecraftforum.net/topic/1284359-",
+		"updateUrl": "",
+		"authorList": ["AtomicStryker"],
+		"credits": "Forge devs",
+		"logoFile": "assets/infernalmobs/textures/gui/logo.png",
+		"screenshots": [],
+		"parent": "",
+		"requiredMods": [],
+		"dependencies": [],
+		"dependants": [],
+		"useDependencyInformation": false
+	}]
 }
-]

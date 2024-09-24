@@ -1,4 +1,4 @@
-Best always check http://atomicstryker.net/about.php for the most up-to-date version of this text
+Best always check https://atomicstryker.github.io/ for the most up-to-date version of this text
 
 
 
@@ -15,4 +15,4 @@ You are allowed to read and use the provided Sourcecode in order to make interac
 You are allowed to integrate ideas or techniques from my Sourcecode into your Mods. 
 Mods and Sourcecode assumed from other authors fall under their respective licenses and copyright statements, a link should always be provided.
 
-All my work is open source. You can check it out here: https://code.google.com/p/atomicstrykers-minecraft-mods/source/browse/
+All my work is open source. You can check it out here: https://github.com/AtomicStryker/atomicstrykers-minecraft-mods
