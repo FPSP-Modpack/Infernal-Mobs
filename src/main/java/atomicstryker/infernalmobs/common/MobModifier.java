@@ -4,9 +4,6 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import org.apache.logging.log4j.Level;
-
-import cpw.mods.fml.common.FMLLog;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -15,57 +12,59 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.common.config.Configuration;
 
-public abstract class MobModifier
-{    
+import org.apache.logging.log4j.Level;
+
+import cpw.mods.fml.common.FMLLog;
+
+public abstract class MobModifier {
+
     /**
      * next MobModifier in a linked chain, on the last one this field is null
      */
     protected MobModifier nextMod;
-    
+
     /**
      * name of this particular MobModifier instance
      */
     protected String modName;
-    
+
     /**
      * keeps track of our past-max-bounds health patch
      */
     private boolean healthHacked;
-    
+
     /**
      * clientside health value to be displayed, because health is not networked
      */
     private float actualHealth;
-    
+
     /**
      * Display-sized (up to 5) series of Modifier Strings, buffered
      */
     private String[] bufferedNames;
-    
+
     /**
      * buffered maximum health
      */
     private float actualMaxHealth;
-    
+
     /**
      * internal mob attack target
      */
     private EntityLivingBase attackTarget;
-    
+
     /**
      * buffered modifier size
      */
     private int bufferedSize;
-    
+
     /**
      * buffered modifier string result
      */
     private String bufferedEntityName;
-    
-    public MobModifier(String name, @Nullable MobModifier next)
-    {
+
+    public MobModifier(String name, @Nullable MobModifier next) {
         nextMod = next;
         healthHacked = false;
         actualHealth = 100;
@@ -73,41 +72,36 @@ public abstract class MobModifier
         bufferedSize = 0;
         modName = name;
     }
-    
+
     /**
      * @return the complete List of linked Modifiers as their Names
      */
-    public String getLinkedModName()
-    {
-        return (StatCollector.translateToLocal("translation.infernalmobs:mod."+modName) + " " + ((nextMod != null) ? nextMod.getLinkedModName() : ""));
+    public String getLinkedModName() {
+        return (StatCollector.translateToLocal("translation.infernalmobs:mod." + modName) + " "
+            + ((nextMod != null) ? nextMod.getLinkedModName() : ""));
     }
-    
+
     /**
      * @return same as above, but without using the translation system
      */
-    public String getLinkedModNameUntranslated()
-    {
+    public String getLinkedModNameUntranslated() {
         return modName + " " + ((nextMod != null) ? nextMod.getLinkedModNameUntranslated() : "");
     }
-    
+
     /**
      * @return Display-sized (up to 5) series of Modifier Strings
      */
-    public String[] getDisplayNames()
-    {
-        if (bufferedNames == null)
-        {
+    public String[] getDisplayNames() {
+        if (bufferedNames == null) {
             String[] allMods = getLinkedModName().split(" ");
             int index = 0;
             int j = 0;
             bufferedNames = new String[3];
             bufferedNames[index] = "";
-            for (String m : allMods)
-            {
+            for (String m : allMods) {
                 bufferedNames[index] = bufferedNames[index] + " " + m;
                 j++;
-                if (j % 5 == 0 && index+1 < bufferedNames.length)
-                {
+                if (j % 5 == 0 && index + 1 < bufferedNames.length) {
                     index++;
                     bufferedNames[index] = "";
                 }
@@ -115,19 +109,16 @@ public abstract class MobModifier
         }
         return bufferedNames;
     }
-    
+
     /**
      * Helper to avoid adding the same mod twice
      */
-    public boolean containsModifierClass(Class<?> checkfor)
-    {
-        if (checkfor.equals(this.getClass()))
-        {
+    public boolean containsModifierClass(Class<?> checkfor) {
+        if (checkfor.equals(this.getClass())) {
             return true;
         }
 
-        if (nextMod != null)
-        {
+        if (nextMod != null) {
             return nextMod.containsModifierClass(checkfor);
         }
 
@@ -136,27 +127,38 @@ public abstract class MobModifier
 
     /**
      * Called when local Spawn Processing is completed or when a client remote-attached Modifiers to a local Entity
-     * @param entity 
+     * 
+     * @param entity
      */
-    public void onSpawningComplete(EntityLivingBase entity)
-    {
-        String oldTag = entity.getEntityData().getString(InfernalMobsCore.instance().getNBTTag());
-        if (!oldTag.isEmpty() && !oldTag.equals(getLinkedModNameUntranslated()))
-        {
-            FMLLog.log("InfernalMobs", Level.DEBUG, String.format("Infernal Mobs tag mismatch!! Was [%s], now trying to set [%s] \n", oldTag, getLinkedModNameUntranslated()));
+    public void onSpawningComplete(EntityLivingBase entity) {
+        String oldTag = entity.getEntityData()
+            .getString(
+                InfernalMobsCore.instance()
+                    .getNBTTag());
+        if (!oldTag.isEmpty() && !oldTag.equals(getLinkedModNameUntranslated())) {
+            FMLLog.log(
+                "InfernalMobs",
+                Level.DEBUG,
+                String.format(
+                    "Infernal Mobs tag mismatch!! Was [%s], now trying to set [%s] \n",
+                    oldTag,
+                    getLinkedModNameUntranslated()));
         }
-        entity.getEntityData().setString(InfernalMobsCore.instance().getNBTTag(), getLinkedModNameUntranslated());
+        entity.getEntityData()
+            .setString(
+                InfernalMobsCore.instance()
+                    .getNBTTag(),
+                getLinkedModNameUntranslated());
     }
 
     /**
      * Passes the death event to the modifier list
+     * 
      * @return true if death should be aborted
      */
-    public boolean onDeath()
-    {
+    public boolean onDeath() {
         attackTarget = null;
-        if (nextMod != null)
-        {
+        if (nextMod != null) {
             return nextMod.onDeath();
         }
 
@@ -166,117 +168,101 @@ public abstract class MobModifier
     /**
      * Passes the loot drop event to the modifier list
      */
-    public void onDropItems(EntityLivingBase moddedMob, DamageSource killSource, ArrayList<EntityItem> drops, int lootingLevel, boolean recentlyHit, int specialDropValue)
-    {
-        if (recentlyHit)
-        {
-            InfernalMobsCore.instance().dropLootForEnt(moddedMob, this);
+    public void onDropItems(EntityLivingBase moddedMob, DamageSource killSource, ArrayList<EntityItem> drops,
+        int lootingLevel, boolean recentlyHit, int specialDropValue) {
+        if (recentlyHit) {
+            InfernalMobsCore.instance()
+                .dropLootForEnt(moddedMob, this);
         }
     }
 
     /**
      * passes the setAttackTarget event to the modifier list
+     * 
      * @param target being passed from the event
      */
-    public void onSetAttackTarget(EntityLivingBase target)
-    {
+    public void onSetAttackTarget(EntityLivingBase target) {
         attackTarget = target;
-        if (nextMod != null)
-        {
+        if (nextMod != null) {
             nextMod.onSetAttackTarget(target);
         }
     }
 
     /**
      * Modified Mob attacks something
+     * 
      * @param entity Entity being attacked
      * @param source DamageSource instance doing the attacking
      * @param amount unmitigated damage value
      * @return damage to be applied after we processed the value
      */
-    public float onAttack(EntityLivingBase entity, DamageSource source, float amount)
-    {
-        if (nextMod != null)
-        {
+    public float onAttack(EntityLivingBase entity, DamageSource source, float amount) {
+        if (nextMod != null) {
             return nextMod.onAttack(entity, source, amount);
         }
-        
+
         return amount;
     }
 
     /**
      * Modified Mob is being hurt
-     * @param mob 
+     * 
+     * @param mob
      * @param source Damagesource doing the hurting
      * @param amount unmitigated damage value
      * @return damage to be applied after we processed the value
      */
-    public float onHurt(EntityLivingBase mob, DamageSource source, float amount)
-    {
-        if (nextMod != null)
-        {
+    public float onHurt(EntityLivingBase mob, DamageSource source, float amount) {
+        if (nextMod != null) {
             amount = nextMod.onHurt(mob, source, amount);
-        }
-        else if (source.getEntity() != null)
-        {
-            if (source.getEntity().worldObj.isRemote
-            && source.getEntity() instanceof EntityPlayer)
-            {
-                InfernalMobsCore.instance().sendHealthRequestPacket(mob);
+        } else if (source.getEntity() != null) {
+            if (source.getEntity().worldObj.isRemote && source.getEntity() instanceof EntityPlayer) {
+                InfernalMobsCore.instance()
+                    .sendHealthRequestPacket(mob);
             }
         }
 
         return amount;
     }
-    
+
     /**
      * passes the fall event to the modifier list
      */
-    public boolean onFall(float distance)
-    {
-        if (nextMod != null)
-        {
+    public boolean onFall(float distance) {
+        if (nextMod != null) {
             return nextMod.onFall(distance);
         }
 
         return false;
     }
-    
+
     /**
      * passes the jump event to the modifier list
      */
-    public void onJump(EntityLivingBase entityLiving)
-    {
-        if (nextMod != null)
-        {
+    public void onJump(EntityLivingBase entityLiving) {
+        if (nextMod != null) {
             nextMod.onJump(entityLiving);
         }
     }
-    
+
     /**
      * passes the update event to the modifier list
      * the return value is currently unused
      */
-    public boolean onUpdate(EntityLivingBase mob)
-    {
-        if (nextMod != null)
-        {
+    public boolean onUpdate(EntityLivingBase mob) {
+        if (nextMod != null) {
             return nextMod.onUpdate(mob);
-        }
-        else
-        {
-            if (attackTarget == null)
-            {
-                if (mob instanceof EntityMob && ((EntityMob) mob).getEntityToAttack() instanceof EntityLivingBase)
-                {
+        } else {
+            if (attackTarget == null) {
+                if (mob instanceof EntityMob && ((EntityMob) mob).getEntityToAttack() instanceof EntityLivingBase) {
                     attackTarget = (EntityLivingBase) ((EntityMob) mob).getEntityToAttack();
                 }
             }
-            
-            if (attackTarget != null)
-            {
-                if (attackTarget.isDead || attackTarget.getDistanceToEntity(mob) > 15f || (attackTarget instanceof EntityPlayer && ((EntityPlayer) attackTarget).capabilities.disableDamage))
-                {
+
+            if (attackTarget != null) {
+                if (attackTarget.isDead || attackTarget.getDistanceToEntity(mob) > 15f
+                    || (attackTarget instanceof EntityPlayer
+                        && ((EntityPlayer) attackTarget).capabilities.disableDamage)) {
                     attackTarget = null;
                 }
             }
@@ -284,199 +270,186 @@ public abstract class MobModifier
 
         return false;
     }
-    
+
     /**
      * clientside helper method. Due to the health not being networked, we keep track of it
      * internally, here. Also, this is a good spot for the more-than-allowed health hack.
-     * @param mob 
+     * 
+     * @param mob
      */
-    public float getActualHealth(EntityLivingBase mob)
-    {
-        if (!mob.worldObj.isRemote)
-        {
+    public float getActualHealth(EntityLivingBase mob) {
+        if (!mob.worldObj.isRemote) {
             increaseHealthForMob(mob, getActualMaxHealth(mob));
         }
-        
+
         return actualHealth;
     }
-    
+
     /**
      * Prevents exponential health increase from re-loading the same infernal mob again and again
      */
-    public void setHealthAlreadyHacked(EntityLivingBase mob)
-    {
-        if (!mob.worldObj.isRemote)
-        {
+    public void setHealthAlreadyHacked(EntityLivingBase mob) {
+        if (!mob.worldObj.isRemote) {
             actualMaxHealth = getActualMaxHealth(mob);
             healthHacked = true;
         }
     }
-    
-    private void increaseHealthForMob(EntityLivingBase mob, float baseHealth)
-    {
-        if (!healthHacked)
-        {
+
+    private void increaseHealthForMob(EntityLivingBase mob, float baseHealth) {
+        if (!healthHacked) {
             actualMaxHealth = getActualMaxHealth(mob);
             actualHealth = actualMaxHealth;
-            InfernalMobsCore.instance().setEntityHealthPastMax(mob, actualHealth);
+            InfernalMobsCore.instance()
+                .setEntityHealthPastMax(mob, actualHealth);
             healthHacked = true;
         }
     }
-    
+
     /**
-     * @param mob 
+     * @param mob
      * @return buffered modified max health
      */
-    public float getActualMaxHealth(EntityLivingBase mob)
-    {
-        if (actualMaxHealth < 0)
-        {
-            actualMaxHealth = (float) (InfernalMobsCore.instance().getMobClassMaxHealth(mob) * getModSize() * InfernalMobsCore.instance().getMobModHealthFactor());
+    public float getActualMaxHealth(EntityLivingBase mob) {
+        if (actualMaxHealth < 0) {
+            actualMaxHealth = (float) (InfernalMobsCore.instance()
+                .getMobClassMaxHealth(mob) * getModSize()
+                * InfernalMobsCore.instance()
+                    .getMobModHealthFactor());
         }
         return actualMaxHealth;
     }
-    
+
     /**
      * clientside receiving end of health packets sent from the InfernalMobs server instance
-     * @param packetReadout 
+     * 
+     * @param packetReadout
      */
-    public void setActualHealth(float health, float maxHealth)
-    {
+    public void setActualHealth(float health, float maxHealth) {
         actualHealth = health;
         actualMaxHealth = maxHealth;
     }
-    
-    protected EntityLivingBase getMobTarget()
-    {        
+
+    protected EntityLivingBase getMobTarget() {
         return attackTarget;
     }
 
     /**
-     * @return Array of classes an EntityLiving cannot equal, implement or extend in order for this MobModifier to be applied to it
+     * @return Array of classes an EntityLiving cannot equal, implement or extend in order for this MobModifier to be
+     *         applied to it
      */
-    public Class<?>[] getBlackListMobClasses()
-    {
+    public Class<?>[] getBlackListMobClasses() {
         return null;
     }
 
     /**
-     * @return Array of MobModifiers a considered MobModifier should not be mixed with. Both sides need to exclude each other for this to work.
+     * @return Array of MobModifiers a considered MobModifier should not be mixed with. Both sides need to exclude each
+     *         other for this to work.
      */
-    public Class<?>[] getModsNotToMixWith()
-    {
+    public Class<?>[] getModsNotToMixWith() {
         return null;
     }
 
     @Override
-    public boolean equals(Object o)
-    {
-        return (o instanceof MobModifier
-                && ((MobModifier)o).modName.equals(modName));
+    public boolean equals(Object o) {
+        return (o instanceof MobModifier && ((MobModifier) o).modName.equals(modName));
     }
-    
+
     /**
      * @return size of linked Mod list
      */
-    public int getModSize()
-    {
-        if (bufferedSize == 0)
-        {
+    public int getModSize() {
+        if (bufferedSize == 0) {
             bufferedSize = 1;
             MobModifier nextmod = this.nextMod;
-            while (nextmod != null)
-            {
+            while (nextmod != null) {
                 bufferedSize++;
                 nextmod = nextmod.nextMod;
             }
         }
-        
+
         return bufferedSize;
     }
-    
+
     /**
      * Should be overridden by modifiers to provide possible name prefixes
      */
-    protected String[] getModNamePrefix()
-    {
+    protected String[] getModNamePrefix() {
         return null;
     }
-    
+
     /**
      * Should be overridden by modifiers to provide possible name suffixes
      */
-    protected String[] getModNameSuffix()
-    {
+    protected String[] getModNameSuffix() {
         return null;
     }
-    
+
     /**
      * Creates the Entity name the Infernal Mobs GUI displays, and buffers it
+     * 
      * @param target Entity to create the Name from
      * @return Entity display name such as 'Rare Zombie'
      */
-    public String getEntityDisplayName(EntityLivingBase target)
-    {
-        if (bufferedEntityName == null)
-        {
+    public String getEntityDisplayName(EntityLivingBase target) {
+        if (bufferedEntityName == null) {
             String buffer = EntityList.getEntityString(target);
-            if (buffer == null)
-            {
+            if (buffer == null) {
                 buffer = "Monster";
             }
             String[] subStrings = buffer.split("\\."); // in case of Package.Class.EntityName derps
-            if (subStrings.length > 1)
-            {
-                buffer = subStrings[subStrings.length-1]; // reduce that to EntityName before proceeding
+            if (subStrings.length > 1) {
+                buffer = subStrings[subStrings.length - 1]; // reduce that to EntityName before proceeding
             }
             buffer = buffer.replaceFirst("Entity", "");
-            
-            String entLoc = "translation.infernalmobs:entity."+buffer;
+
+            String entLoc = "translation.infernalmobs:entity." + buffer;
             String entTrans = StatCollector.translateToLocal(entLoc);
-            if (!entLoc.equals(entTrans))
-            {
+            if (!entLoc.equals(entTrans)) {
                 buffer = entTrans;
             }
-            
+
             int size = getModSize();
-            
-            int randomMod = target.getRNG().nextInt(getModSize());
+
+            int randomMod = target.getRNG()
+                .nextInt(getModSize());
             MobModifier mod = this;
-            while (randomMod > 0)
-            {
+            while (randomMod > 0) {
                 mod = mod.nextMod;
                 randomMod--;
             }
-            
-            String modprefix = "";
-            if (mod.getModNamePrefix() != null)
-            {
-                modprefix = mod.getModNamePrefix()[target.getRNG().nextInt(mod.getModNamePrefix().length)];
-                modprefix = StatCollector.translateToLocal("translation.infernalmobs:prefix."+modprefix);
-            }
-            
-            String prefix = size <= 5 ? EnumChatFormatting.AQUA+StatCollector.translateToLocal("translation.infernalmobs:rareClass") 
-                    : size <= 10 ? EnumChatFormatting.YELLOW+StatCollector.translateToLocal("translation.infernalmobs:ultraClass") 
-                            : EnumChatFormatting.GOLD+StatCollector.translateToLocal("translation.infernalmobs:infernalClass");
 
-            buffer = prefix+modprefix+buffer;
-            
-            if (size > 1)
-            {
+            String modprefix = "";
+            if (mod.getModNamePrefix() != null) {
+                modprefix = mod.getModNamePrefix()[target.getRNG()
+                    .nextInt(mod.getModNamePrefix().length)];
+                modprefix = StatCollector.translateToLocal("translation.infernalmobs:prefix." + modprefix);
+            }
+
+            String prefix = size <= 5
+                ? EnumChatFormatting.AQUA + StatCollector.translateToLocal("translation.infernalmobs:rareClass")
+                : size <= 10
+                    ? EnumChatFormatting.YELLOW + StatCollector.translateToLocal("translation.infernalmobs:ultraClass")
+                    : EnumChatFormatting.GOLD
+                        + StatCollector.translateToLocal("translation.infernalmobs:infernalClass");
+
+            buffer = prefix + modprefix + buffer;
+
+            if (size > 1) {
                 mod = mod.nextMod != null ? mod.nextMod : this;
-                if (mod.getModNameSuffix() != null)
-                {
-                    String pickedSuffix = mod.getModNameSuffix()[target.getRNG().nextInt(mod.getModNameSuffix().length)];
-                    pickedSuffix = StatCollector.translateToLocal("translation.infernalmobs:suffix."+pickedSuffix);
-                    buffer = buffer+pickedSuffix;
+                if (mod.getModNameSuffix() != null) {
+                    String pickedSuffix = mod.getModNameSuffix()[target.getRNG()
+                        .nextInt(mod.getModNameSuffix().length)];
+                    pickedSuffix = StatCollector.translateToLocal("translation.infernalmobs:suffix." + pickedSuffix);
+                    buffer = buffer + pickedSuffix;
                 }
             }
-            
+
             bufferedEntityName = buffer;
         }
-        
+
         return bufferedEntityName;
     }
-    
+
     /**
      * if a modifier does permanent changes to an entity, they need to register
      * the playername at InfernalMobsCore.instance().getModifiedPlayerTimes()
@@ -484,8 +457,7 @@ public abstract class MobModifier
      * infernal'd for a while and triggers this modifiers should override this
      * and clean up their changes when necessary
      */
-    public void resetModifiedVictim(EntityPlayer victim)
-    {
+    public void resetModifiedVictim(EntityPlayer victim) {
         // NOOP by default
     }
 
