@@ -17,6 +17,7 @@ public class MM_Gravity extends MobModifier {
 
     private long nextAbilityUse = 0L;
     private static long coolDown;
+    private static double maxDistanceSquared;
 
     public MM_Gravity(@Nullable MobModifier next) {
         super("Gravity", next);
@@ -46,7 +47,7 @@ public class MM_Gravity extends MobModifier {
     }
 
     private void tryAbility(EntityLivingBase mob, EntityLivingBase target) {
-        if (target == null || !mob.canEntityBeSeen(target)) {
+        if (target == null || !mob.canEntityBeSeen(target) || mob.getDistanceSqToEntity(target) >= maxDistanceSquared) {
             return;
         }
 
@@ -128,6 +129,9 @@ public class MM_Gravity extends MobModifier {
         public void loadConfig(Configuration config) {
             coolDown = config.get(getModifierClassName(), "coolDownMillis", 5000L, "Time between ability uses")
                 .getInt(5000) / 50;
+            double maxDistance = config.get(getModifierClassName(), "maxDistance", 40, "Range of ability.")
+                .getDouble();
+            maxDistanceSquared = maxDistance * maxDistance;
         }
     }
 }

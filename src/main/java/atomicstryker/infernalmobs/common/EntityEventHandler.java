@@ -130,7 +130,7 @@ public class EntityEventHandler {
              * and attacker
              */
             Entity attacker = event.source.getEntity();
-            if (attacker != null && attacker instanceof EntityLivingBase) {
+            if (attacker instanceof EntityLivingBase && !event.source.damageType.equals("thorns")) {
                 mod = InfernalMobsCore.getMobModifiers((EntityLivingBase) attacker);
                 if (mod != null) {
                     event.ammount = mod.onAttack(event.entityLiving, event.source, event.ammount);
